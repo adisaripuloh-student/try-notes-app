@@ -1,10 +1,13 @@
 package me.firmannizammudin.notes.notes;
 
 
+import android.content.Context;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v4.widget.SwipeRefreshLayout;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -36,7 +39,7 @@ public class NotesFragment extends Fragment implements NotesContract.View {
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        listAdapter = new NotesAdapter(new ArrayList<Note>(0));
+        listAdapter = new NotesAdapter(getActivity(), new ArrayList<Note>(0));
     }
 
     @Override
@@ -44,8 +47,9 @@ public class NotesFragment extends Fragment implements NotesContract.View {
                              Bundle savedInstanceState) {
         View root = inflater.inflate(R.layout.fragment_notes, container, false);
 
-        ListView listView = (ListView) root.findViewById(R.id.notes_lv);
-        listView.setAdapter(listAdapter);
+        RecyclerView rv = (RecyclerView) root.findViewById(R.id.notes_rv);
+        rv.setLayoutManager(new LinearLayoutManager(getActivity()));
+        rv.setAdapter(listAdapter);
         return root;
     }
 
@@ -69,7 +73,6 @@ public class NotesFragment extends Fragment implements NotesContract.View {
         final SwipeRefreshLayout srl =
                 (SwipeRefreshLayout) getView().findViewById(R.id.notes_sr);
 
-        // Make sure setRefreshing() is called after the layout is done with everything else.
         srl.post(new Runnable() {
             @Override
             public void run() {
@@ -79,7 +82,7 @@ public class NotesFragment extends Fragment implements NotesContract.View {
     }
 
     @Override
-    public void showTasks(List<Note> notes) {
+    public void showNotes(List<Note> notes) {
         listAdapter.replaceData(notes);
     }
 
@@ -88,72 +91,54 @@ public class NotesFragment extends Fragment implements NotesContract.View {
         this.presenter = presenter;
     }
 
-    private static class NotesAdapter extends BaseAdapter {
+    private static class NotesAdapter extends RecyclerView.Adapter<NotesAdapter.ViewHolder> {
 
-        private List<Note> notes;
+        private List<Note> dataSet;
+        private Context context;
 
-        public NotesAdapter(List<Note> notes) {
-            setList(notes);
+        public class ViewHolder extends RecyclerView.ViewHolder {
+            private CheckBox cbComplete;
+            private TextView txtTitle;
+
+            public ViewHolder(View v) {
+                super(v);
+                cbComplete = (CheckBox) v.findViewById(R.id.notes_cb_complete);
+                txtTitle = (TextView) v.findViewById(R.id.notes_txt_title);
+                v.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View view) {
+                    }
+                });
+            }
+        }
+
+        public NotesAdapter(Context context, List<Note> dataSet) {
+            this.context = context;
+            this.dataSet = dataSet;
+        }
+
+        @Override
+        public NotesAdapter.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+            View v = LayoutInflater.from(context)
+                    .inflate(R.layout.note_row_item, parent, false);
+
+            return new ViewHolder(v);
+        }
+
+        @Override
+        public void onBindViewHolder(NotesAdapter.ViewHolder holder, int position) {
+            Note note = dataSet.get(position);
+            holder.txtTitle.setText(note.getTitle());
+        }
+
+        @Override
+        public int getItemCount() {
+            return dataSet.size();
         }
 
         public void replaceData(List<Note> notes) {
-            setList(notes);
+            this.dataSet = notes;
             notifyDataSetChanged();
         }
-
-        private void setList(List<Note> notes) {
-            this.notes = notes;
-        }
-
-        @Override
-        public int getCount() {
-            return notes.size();
-        }
-
-        @Override
-        public Note getItem(int i) {
-            return notes.get(i);
-        }
-
-        @Override
-        public long getItemId(int i) {
-            return i;
-        }
-
-        @Override
-        public View getView(int i, View view, ViewGroup viewGroup) {
-            View rowView = view;
-            if (rowView == null) {
-                LayoutInflater inflater = LayoutInflater.from(viewGroup.getContext());
-                rowView = inflater.inflate(R.layout.note_row_item, viewGroup, false);
-            }
-
-            final Note note = getItem(i);
-
-            TextView titleTV = (TextView) rowView.findViewById(R.id.notes_txt_title);
-            titleTV.setText(note.getTitle());
-
-            CheckBox completeCB = (CheckBox) rowView.findViewById(R.id.notes_cb_complete);
-
-            completeCB.setChecked(note.isCompleted());
-            if (note.isCompleted()) {
-            } else {
-            }
-
-            completeCB.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                }
-            });
-
-            rowView.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View view) {
-                }
-            });
-
-            return rowView;
-        }
     }
-
 }

@@ -1,11 +1,13 @@
 package me.firmannizammudin.notes.notes;
 
 import android.support.annotation.NonNull;
+import android.util.Log;
+import android.widget.Toast;
 
 import java.util.List;
 
 import me.firmannizammudin.notes.data.Note;
-import me.firmannizammudin.notes.data.source.NotesRepository;
+import me.firmannizammudin.notes.data.source.remote.APIService;
 import me.firmannizammudin.notes.util.scheduler.BaseSchedulerProvider;
 import rx.Observable;
 import rx.Observer;
@@ -19,23 +21,15 @@ import rx.subscriptions.CompositeSubscription;
 
 public class NotesPresenter implements NotesContract.Presenter {
 
-    @NonNull
-    private final NotesRepository notesRepository;
-
-    @NonNull
+    private final APIService notesRepository;
     private final NotesContract.View notesView;
-
-    @NonNull
     private final BaseSchedulerProvider schedulerProvider;
-
-    @NonNull
     private CompositeSubscription subscriptions;
-
     private boolean mFirstLoad = true;
 
-    public NotesPresenter(@NonNull NotesRepository notesRepository,
-                          @NonNull NotesContract.View notesView,
-                          @NonNull BaseSchedulerProvider schedulerProvider) {
+    public NotesPresenter(APIService notesRepository,
+                          NotesContract.View notesView,
+                          BaseSchedulerProvider schedulerProvider) {
         this.notesRepository = notesRepository;
         this.notesView = notesView;
         this.schedulerProvider = schedulerProvider;
@@ -46,7 +40,7 @@ public class NotesPresenter implements NotesContract.Presenter {
 
     @Override
     public void subscribe() {
-        loadTasks(false);
+        loadNotes(false);
     }
 
     @Override
@@ -55,11 +49,7 @@ public class NotesPresenter implements NotesContract.Presenter {
     }
 
     @Override
-    public void result(int requestCode, int resultCode) {
-    }
-
-    @Override
-    public void loadTasks(boolean forceUpdate) {
+    public void loadNotes(boolean forceUpdate) {
         loadTasks(forceUpdate || mFirstLoad, true);
         mFirstLoad = false;
     }
@@ -70,24 +60,16 @@ public class NotesPresenter implements NotesContract.Presenter {
         }
 
         subscriptions.clear();
-        Subscription subscription = notesRepository
-                .getNotes()
-                .flatMap(new Func1<List<Note>, Observable<Note>>() {
+        Subscription subscription = notesRepository.getNotes()
+                .filter(new Func1<Note.Notes, Boolean>() {
                     @Override
-                    public Observable<Note> call(List<Note> tasks) {
-                        return Observable.from(tasks);
-                    }
-                })
-                .filter(new Func1<Note, Boolean>() {
-                    @Override
-                    public Boolean call(Note note) {
+                    public Boolean call(Note.Notes notes) {
                         return true;
                     }
                 })
-                .toList()
                 .subscribeOn(schedulerProvider.computation())
                 .observeOn(schedulerProvider.ui())
-                .subscribe(new Observer<List<Note>>() {
+                .subscribe(new Observer<Note.Notes>() {
                     @Override
                     public void onCompleted() {
                         notesView.setLoadingIndicator(false);
@@ -95,17 +77,19 @@ public class NotesPresenter implements NotesContract.Presenter {
 
                     @Override
                     public void onError(Throwable e) {
+                        Log.d("ERROR PRESENTER", "BOOM " + e.getMessage());
                     }
 
                     @Override
-                    public void onNext(List<Note> tasks) {
-                        processTasks(tasks);
+                    public void onNext(Note.Notes notes) {
+                        processTasks(notes.getData());
                     }
                 });
+
         subscriptions.add(subscription);
     }
 
-    private void processTasks(@NonNull List<Note> notes) {
-        notesView.showTasks(notes);
+    private void processTasks(List<Note> notes) {
+        notesView.showNotes(notes);
     }
 }

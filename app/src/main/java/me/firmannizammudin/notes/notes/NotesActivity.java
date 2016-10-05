@@ -48,7 +48,7 @@ public class NotesActivity extends AppCompatActivity
         }
 
         notesPresenter = new NotesPresenter(
-                Injection.provideTasksRepository(getApplicationContext()),
+                Injection.provideNotesRepository(getApplicationContext()),
                 notesFragment,
                 Injection.provideSchedulerProvider());
     }

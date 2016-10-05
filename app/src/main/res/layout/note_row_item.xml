@@ -1,12 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="?android:attr/listPreferredItemHeight"
+    android:layout_height="wrap_content"
+    android:background="@android:color/white"
     android:orientation="horizontal"
-    android:paddingBottom="16dp"
+    android:layout_marginBottom="8dp"
+    android:paddingBottom="24dp"
     android:paddingLeft="@dimen/activity_horizontal_margin"
     android:paddingRight="@dimen/activity_horizontal_margin"
-    android:paddingTop="16dp">
+    android:paddingTop="24dp">
 
     <CheckBox
         android:id="@+id/notes_cb_complete"
@@ -17,8 +19,10 @@
     <TextView
         android:id="@+id/notes_txt_title"
         android:layout_width="match_parent"
+        android:text="Test"
+        android:textStyle="bold"
         android:layout_height="wrap_content"
         android:layout_gravity="center_vertical"
-        android:layout_marginLeft="@dimen/activity_horizontal_margin"
-        android:textAppearance="@style/TextAppearance.AppCompat.Title" />
+        android:layout_marginLeft="8dp" />
+
 </LinearLayout>

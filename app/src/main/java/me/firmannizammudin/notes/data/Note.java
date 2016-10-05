@@ -1,5 +1,7 @@
 package me.firmannizammudin.notes.data;
 
+import java.util.List;
+
 /**
  * Created by Firman on 04-Oct-16.
  */
@@ -56,5 +58,13 @@ public class Note {
     @Override
     public String toString() {
         return "Task with title " + title;
+    }
+
+    public class Notes extends BaseModel {
+        private List<Note> data;
+
+        public List<Note> getData() {
+            return data;
+        }
     }
 }

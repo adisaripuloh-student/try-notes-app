@@ -15,12 +15,10 @@ public interface NotesContract {
     interface View extends BaseView<Presenter> {
         void setLoadingIndicator(boolean active);
 
-        void showTasks(List<Note> notes);
+        void showNotes(List<Note> notes);
     }
 
     interface Presenter extends BasePresenter {
-        void result(int requestCode, int resultCode);
-
-        void loadTasks(boolean forceUpdate);
+        void loadNotes(boolean forceUpdate);
     }
 }

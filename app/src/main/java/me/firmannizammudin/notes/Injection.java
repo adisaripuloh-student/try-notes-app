@@ -1,10 +1,8 @@
 package me.firmannizammudin.notes;
 
 import android.content.Context;
-import android.support.annotation.NonNull;
 
-import me.firmannizammudin.notes.data.source.NotesRepository;
-import me.firmannizammudin.notes.data.source.remote.NotesRemoteDataSource;
+import me.firmannizammudin.notes.data.source.remote.APIService;
 import me.firmannizammudin.notes.util.scheduler.BaseSchedulerProvider;
 import me.firmannizammudin.notes.util.scheduler.SchedulerProvider;
 
@@ -13,8 +11,8 @@ import me.firmannizammudin.notes.util.scheduler.SchedulerProvider;
  */
 
 public class Injection {
-    public static NotesRepository provideTasksRepository(@NonNull Context context) {
-        return NotesRepository.getInstance(NotesRemoteDataSource.getInstance());
+    public static APIService provideNotesRepository(Context context) {
+        return APIService.factory.create();
     }
 
     public static BaseSchedulerProvider provideSchedulerProvider() {
